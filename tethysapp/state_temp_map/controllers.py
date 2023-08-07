@@ -1,8 +1,11 @@
 import json
 from pathlib import Path
+import pandas as pd
 from tethys_sdk.layouts import MapLayout
 from tethys_sdk.routing import controller
 from .app import StateTempMap as app
+
+MODEL_OUTPUT_FOLDER_NAME = 'states_temp'
 
 @controller(name="home", app_workspace=True)
 class StateTempMap(MapLayout):
@@ -10,13 +13,15 @@ class StateTempMap(MapLayout):
     base_template = 'state_temp_map/base.html'
     map_title = 'U.S. States Temprature'
     map_subtitle = ''
+    show_properties_popup = True
+    plot_slide_sheet = True
 
     def compose_layers(self, request, map_view, app_workspace, *args, **kwargs):
         """
         Add layers to the MapLayout and create associated layer group objects.
         """
         # Load GeoJSON from files
-        input_directory = Path(app_workspace.path) / 'states_temp' / 'input'
+        input_directory = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'input'
 
         # Nexus Points
         states_path = input_directory / 'us-states-5m_4326.json'
@@ -46,3 +51,60 @@ class StateTempMap(MapLayout):
         ]
 
         return layer_groups
+
+    # TODO what is classmethod?
+    # @classmethod
+    # def get_vector_style_map(cls):
+    #     pass
+
+    def get_plot_for_layer_feature(self, request, layer_name, feature_id, layer_data, feature_props, app_workspace,
+                                *args, **kwargs):
+        """
+        Retrieves plot data for given feature on given layer.
+
+        Args:
+            layer_name (str): Name/id of layer.
+            feature_id (str): ID of feature.
+            layer_data (dict): The MVLayer.data dictionary.
+            feature_props (dict): The properties of the selected feature.
+
+        Returns:
+            str, list<dict>, dict: plot title, data series, and layout options, respectively.
+        """
+        output_directory = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'output'
+
+        # Get the feature id
+        name = feature_props.get('NAME')
+
+        layout = {
+            'yaxis': {
+                'title': 'Temperature (°F)'
+            }, 
+            'xaxis': {
+                'title': 'Year'
+            }
+        }
+
+        output_path = output_directory / f'{name}.csv'
+        if not output_path.exists():
+            print(f'WARNING: no such file {output_path}')
+            return f'No Data Found for "{name}"', [], layout
+        
+        # parse with pandas
+        df = pd.read_csv(output_path)
+        data = [
+            {
+                    'name': 'Temperature',
+                    'mode': 'lines',
+                    'x': df['Year'].to_list(),
+                    'y': df.iloc[:, 1].to_list(),
+                    'line': {
+                        'width': 2,
+                        'color': 'red'
+                    }
+                },
+        ]
+
+        return f'Evapotranspiration at Catchment "{name}"', data, layout
+
+            
