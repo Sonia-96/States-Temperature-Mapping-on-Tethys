@@ -1,4 +1,5 @@
 from tethys_sdk.base import TethysAppBase
+from tethys_sdk.app_settings import SpatialDatasetServiceSetting
 
 
 class StateTempMap(TethysAppBase):
@@ -16,3 +17,18 @@ class StateTempMap(TethysAppBase):
     tags = 'Temperature, Timesetires'
     enable_feedback = False
     feedback_emails = []
+
+    def spatial_dataset_service_settings(self):
+        """
+        Example spatial_dataset_service_settings method.
+        """
+        sds_settings = (
+            SpatialDatasetServiceSetting(
+                name='primary_geoserver',
+                description='spatial dataset service for app to use',
+                engine=SpatialDatasetServiceSetting.GEOSERVER,
+                required=True,
+            ),
+        )
+
+        return sds_settings
