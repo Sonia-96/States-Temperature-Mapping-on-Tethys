@@ -1,9 +1,15 @@
 import json
 from pathlib import Path
 import pandas as pd
+
+from django.contrib import messages
+
 from tethys_sdk.layouts import MapLayout
 from tethys_sdk.routing import controller
+from tethys_sdk.app_settings import TethysAppSettingNotAssigned
+
 from .app import StateTempMap as app
+
 
 MODEL_OUTPUT_FOLDER_NAME = 'states_temp'
 
@@ -21,26 +27,36 @@ class StateTempMap(MapLayout):
         Add layers to the MapLayout and create associated layer group objects.
         """
 
-        # WMS Layer
-        usa_population = self.build_wms_layer(
-            endpoint='http://localhost:8080/geoserver/wms',
-            server_type='geoserver',
-            layer_name='topp:states',
-            layer_title='USA Population',
-            layer_variable='population',
-            visible=False,  # Set to False if the layer should be hidden initially
-            selectable=True,
-            geometry_attribute='the_geom',
-            excluded_properties=['STATE_FIPS', 'SUB_REGION'],
-        )
+        try:
+            geoserver_wms_url = self.app.get_spatial_dataset_service(
+                'primary_geoserver', 
+                as_endpoint=True,
+                as_wms=True
+            )
+            # messages.warning(request, geoserver_wms_url)
+            wms_configured = True
+        except TethysAppSettingNotAssigned:
+            wms_configured = False
+            messages.warning(request, 'Assign a GeoServer in app settings to see a WMS layer example.')
 
-        # Add layer to map
-        map_view.layers.append(usa_population)
+        # WMS Layer
+        wms_layer = None
+        if wms_configured:
+            wms_layer = self.build_wms_layer(
+                endpoint=geoserver_wms_url, # 'http://localhost:8080/geoserver/wms'
+                server_type='geoserver',
+                layer_name='topp:states',
+                layer_title='USA Population',
+                layer_variable='population',
+                visible=False,  # Set to False if the layer should be hidden initially
+                selectable=True,
+                geometry_attribute='the_geom',
+                excluded_properties=['STATE_FIPS', 'SUB_REGION'],
+                plottable=True
+            )
 
         # Load GeoJSON from files
         input_directory = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'input'
-
-        # Nexus Points
         states_path = input_directory / 'us-states-5m_4326.json'
         with open(states_path) as file:
             states_geojson = json.loads(file.read())
@@ -53,8 +69,14 @@ class StateTempMap(MapLayout):
             visible=True,
             selectable=True,
             plottable=True,
-            excluded_properties=['GEO_ID', 'STATE', 'LSAD']
+            excluded_properties=['GEO_ID', 'STATE', 'LSAD'],
         )
+
+        # Add layers to map
+        if wms_configured and wms_layer:
+            layers = [wms_layer, geojson_layer]
+        else:
+            layers = [geojson_layer]
 
         # Create layer groups
         layer_groups = [
@@ -62,10 +84,7 @@ class StateTempMap(MapLayout):
                 id='states-path',
                 display_name='GeoJSON Layer',
                 layer_control='radio',  # 'checkbox' or 'radio'
-                layers=[
-                    usa_population,
-                    geojson_layer,
-                ]
+                layers=layers
             )
         ]
 

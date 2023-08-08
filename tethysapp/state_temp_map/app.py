@@ -24,7 +24,7 @@ class StateTempMap(TethysAppBase):
         """
         sds_settings = (
             SpatialDatasetServiceSetting(
-                name='main_geoserver',
+                name='primary_geoserver',
                 description='spatial dataset service for app to use',
                 engine=SpatialDatasetServiceSetting.GEOSERVER,
                 required=True,
