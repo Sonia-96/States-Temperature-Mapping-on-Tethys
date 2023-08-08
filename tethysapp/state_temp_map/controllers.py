@@ -143,6 +143,6 @@ class StateTempMap(MapLayout):
                 },
         ]
 
-        return f'Evapotranspiration at Catchment "{name}"', data, layout
+        return f'Temperature History for {name}', data, layout
 
             
