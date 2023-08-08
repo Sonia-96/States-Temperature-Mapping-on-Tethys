@@ -46,7 +46,7 @@ class StateTempMap(MapLayout):
                 endpoint=geoserver_wms_url, # 'http://localhost:8080/geoserver/wms'
                 server_type='geoserver',
                 layer_name='topp:states',
-                layer_title='USA Population',
+                layer_title='Population',
                 layer_variable='population',
                 visible=False,  # Set to False if the layer should be hidden initially
                 selectable=True,
@@ -56,15 +56,15 @@ class StateTempMap(MapLayout):
             )
 
         # Load GeoJSON from files
-        input_directory = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'input'
-        states_path = input_directory / 'us-states-5m_4326.json'
+        output_directory = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'output'
+        states_path = output_directory / 'us-states-5m+temp.json'
         with open(states_path) as file:
             states_geojson = json.loads(file.read())
 
         geojson_layer = self.build_geojson_layer(
             geojson=states_geojson,
             layer_name='states',
-            layer_title='States',
+            layer_title='Temperature',
             layer_variable='states',
             visible=True,
             selectable=True,
@@ -82,7 +82,7 @@ class StateTempMap(MapLayout):
         layer_groups = [
             self.build_layer_group(
                 id='states-path',
-                display_name='GeoJSON Layer',
+                display_name='Map Layers',
                 layer_control='radio',  # 'checkbox' or 'radio'
                 layers=layers
             )
