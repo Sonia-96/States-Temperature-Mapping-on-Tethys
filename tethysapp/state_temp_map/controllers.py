@@ -21,6 +21,7 @@ class StateTempMap(MapLayout):
     map_subtitle = ''
     show_properties_popup = True
     plot_slide_sheet = True
+    default_map_extent = [-160.66087226210573, 16.074820504712008, -63.96965222124838, 71.85428803681944]
 
     def compose_layers(self, request, map_view, app_workspace, *args, **kwargs):
         """
