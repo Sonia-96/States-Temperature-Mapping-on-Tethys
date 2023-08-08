@@ -20,6 +20,23 @@ class StateTempMap(MapLayout):
         """
         Add layers to the MapLayout and create associated layer group objects.
         """
+
+        # WMS Layer
+        usa_population = self.build_wms_layer(
+            endpoint='http://localhost:8080/geoserver/wms',
+            server_type='geoserver',
+            layer_name='topp:states',
+            layer_title='USA Population',
+            layer_variable='population',
+            visible=False,  # Set to False if the layer should be hidden initially
+            selectable=True,
+            geometry_attribute='the_geom',
+            excluded_properties=['STATE_FIPS', 'SUB_REGION'],
+        )
+
+        # Add layer to map
+        map_view.layers.append(usa_population)
+
         # Load GeoJSON from files
         input_directory = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'input'
 
@@ -36,6 +53,7 @@ class StateTempMap(MapLayout):
             visible=True,
             selectable=True,
             plottable=True,
+            excluded_properties=['GEO_ID', 'STATE', 'LSAD']
         )
 
         # Create layer groups
@@ -45,6 +63,7 @@ class StateTempMap(MapLayout):
                 display_name='GeoJSON Layer',
                 layer_control='radio',  # 'checkbox' or 'radio'
                 layers=[
+                    usa_population,
                     geojson_layer,
                 ]
             )
