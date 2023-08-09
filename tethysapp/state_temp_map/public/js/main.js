@@ -1,8 +1,10 @@
 $(function() {
     let map = TETHYS_MAP_VIEW.getMap();
+    console.log("hello");
+    console.log(map);
     let geojson_layer;
     map.getLayers().forEach(layer => {
-        if (layer.tethys_legend_title == "Temperature") {
+        if (layer.tethys_legend_title == "States Temperature") {
             geojson_layer = layer;
         }
     });

@@ -62,10 +62,10 @@ class StateTempMap(MapLayout):
         with open(states_path) as file:
             states_geojson = json.loads(file.read())
 
-        geojson_layer = self.build_geojson_layer(
+        state_layer = self.build_geojson_layer(
             geojson=states_geojson,
             layer_name='states',
-            layer_title='Temperature',
+            layer_title='States Temperature',
             layer_variable='states',
             visible=True,
             selectable=True,
@@ -73,28 +73,38 @@ class StateTempMap(MapLayout):
             excluded_properties=['GEO_ID', 'STATE', 'LSAD'],
         )
 
+        city_points = output_directory / 'us-10-hottest-cities.json'
+        # city_points = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'input' / 'USA_Major_Cities.geojson'
+        with open(city_points) as file:
+            city_geojson = json.loads(file.read())
+
+        city_layer = self.build_geojson_layer(
+            geojson=city_geojson,
+            layer_name='cities',
+            layer_title='10 Hottest Cities',
+            layer_variable='cities',
+            visible=True,
+            selectable=False,
+            plottable=False,
+        )
+
         # Add layers to map
         if wms_configured and wms_layer:
-            layers = [wms_layer, geojson_layer]
+            layers = [wms_layer, state_layer, city_layer]
         else:
-            layers = [geojson_layer]
+            layers = [state_layer, city_layer]
 
         # Create layer groups
         layer_groups = [
             self.build_layer_group(
-                id='states-path',
-                display_name='Map Layers',
+                id='whatever',
+                display_name='GeoJSON Layers',
                 layer_control='radio',  # 'checkbox' or 'radio'
                 layers=layers
-            )
+            ),
         ]
 
         return layer_groups
-
-    # TODO what is classmethod?
-    # @classmethod
-    # def get_vector_style_map(cls):
-    #     pass
 
     def get_plot_for_layer_feature(self, request, layer_name, feature_id, layer_data, feature_props, app_workspace,
                                 *args, **kwargs):
