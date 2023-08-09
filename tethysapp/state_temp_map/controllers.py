@@ -84,27 +84,48 @@ class StateTempMap(MapLayout):
             layer_title='10 Hottest Cities',
             layer_variable='cities',
             visible=True,
-            selectable=False,
-            plottable=False,
+            selectable=True,
+            plottable=False
         )
 
-        # Add layers to map
-        if wms_configured and wms_layer:
-            layers = [wms_layer, state_layer, city_layer]
-        else:
-            layers = [state_layer, city_layer]
-
         # Create layer groups
-        layer_groups = [
+        if wms_configured:
+            layer_groups = [
+                self.build_layer_group(
+                    id='population',
+                    display_name='Population',
+                    layer_control='radio',  # 'checkbox' or 'radio'
+                    layers=[wms_layer]
+                ),
+            ]
+
+        layer_groups.append(
             self.build_layer_group(
-                id='whatever',
-                display_name='GeoJSON Layers',
-                layer_control='radio',  # 'checkbox' or 'radio'
-                layers=layers
+                id='temperature',
+                display_name='Temperature',
+                layer_control='checkbox',  # 'checkbox' or 'radio'
+                layers=[city_layer, state_layer]
             ),
-        ]
+        )
 
         return layer_groups
+    
+    @classmethod
+    def get_vector_style_map(cls):
+        return {
+            'Point': {'ol.style.Style': {
+                'image': {'ol.style.Circle': {
+                    'radius': 5,
+                    'fill': {'ol.style.Fill': {
+                        'color': 'white',
+                    }},
+                    'stroke': {'ol.style.Stroke': {
+                        'color': 'red',
+                        'width': 3
+                    }}
+                }}
+            }}
+        }
 
     def get_plot_for_layer_feature(self, request, layer_name, feature_id, layer_data, feature_props, app_workspace,
                                 *args, **kwargs):
