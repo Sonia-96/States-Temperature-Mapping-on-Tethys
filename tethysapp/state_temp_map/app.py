@@ -7,11 +7,11 @@ class StateTempMap(TethysAppBase):
     Tethys app class for States Temprature Mapping.
     """
 
-    name = 'States Temprature Mapping'
-    description = 'US States Temperature Mapping'
+    name = 'States Population & Temperature'
+    description = 'U.S. States Population & Temperature Mapping'
     package = 'state_temp_map'  # WARNING: Do not change this value
     index = 'home'
-    icon = f'{package}/images/icon.gif'
+    icon = f'{package}/images/icon.png'
     root_url = 'state-temp-map'
     color = '#003087'
     tags = 'Temperature, Timesetires'
