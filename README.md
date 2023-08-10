@@ -10,6 +10,8 @@ This is a web map application built on [Tethys Platform](https://www.tethysplatf
 
 2. GeoJSON layers for temperature
 
+   ![image-20230810002802241](./assets/geojson-layer-state.png)
+
    ![image-20230810002802241](./assets/geojson-layer.png)
 
 3. Plotting of temperature history
