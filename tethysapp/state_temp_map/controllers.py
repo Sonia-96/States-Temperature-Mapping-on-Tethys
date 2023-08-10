@@ -17,11 +17,12 @@ MODEL_OUTPUT_FOLDER_NAME = 'states_temp'
 class StateTempMap(MapLayout):
     app = app
     base_template = 'state_temp_map/base.html'
-    map_title = 'States Population & Temperature'
+    map_title = 'U.S. Population & Temperature'
     map_subtitle = ''
     show_properties_popup = True
     plot_slide_sheet = True
     default_map_extent = [-160.66087226210573, 16.074820504712008, -63.96965222124838, 71.85428803681944]
+    geoserver_workspace = 'topp'
 
     def compose_layers(self, request, map_view, app_workspace, *args, **kwargs):
         """
@@ -34,7 +35,6 @@ class StateTempMap(MapLayout):
                 as_endpoint=True,
                 as_wms=True
             )
-            # messages.warning(request, geoserver_wms_url)
             wms_configured = True
         except TethysAppSettingNotAssigned:
             wms_configured = False
@@ -44,7 +44,7 @@ class StateTempMap(MapLayout):
         wms_layer = None
         if wms_configured:
             wms_layer = self.build_wms_layer(
-                endpoint=geoserver_wms_url, # 'http://localhost:8080/geoserver/wms'
+                endpoint=geoserver_wms_url, # or 'https://tethys2.byu.edu/geoserver/wms'
                 server_type='geoserver',
                 layer_name='topp:states',
                 layer_title='Population',
@@ -74,7 +74,6 @@ class StateTempMap(MapLayout):
         )
 
         city_points = output_directory / 'us-10-hottest-cities.json'
-        # city_points = Path(app_workspace.path) / MODEL_OUTPUT_FOLDER_NAME / 'input' / 'USA_Major_Cities.geojson'
         with open(city_points) as file:
             city_geojson = json.loads(file.read())
 
@@ -89,21 +88,22 @@ class StateTempMap(MapLayout):
         )
 
         # Create layer groups
+        layer_groups = []
         if wms_configured:
-            layer_groups = [
+            layer_groups.append(
                 self.build_layer_group(
                     id='population',
                     display_name='Population',
-                    layer_control='radio',  # 'checkbox' or 'radio'
+                    layer_control='radio',
                     layers=[wms_layer]
-                ),
-            ]
+                )
+            )
 
         layer_groups.append(
             self.build_layer_group(
                 id='temperature',
                 display_name='Temperature',
-                layer_control='checkbox',  # 'checkbox' or 'radio'
+                layer_control='checkbox',
                 layers=[city_layer, state_layer]
             ),
         )
