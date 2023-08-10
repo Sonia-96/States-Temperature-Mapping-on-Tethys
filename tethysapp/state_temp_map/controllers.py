@@ -17,7 +17,7 @@ MODEL_OUTPUT_FOLDER_NAME = 'states_temp'
 class StateTempMap(MapLayout):
     app = app
     base_template = 'state_temp_map/base.html'
-    map_title = 'U.S. Population & Temperature'
+    map_title = 'Map Layers'
     map_subtitle = ''
     show_properties_popup = True
     plot_slide_sheet = True
